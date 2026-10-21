@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>Listify AI — Product Listing Studio</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#e5e7eb;--bg:#f7f8fb;--accent:#6558f5;--accent2:#5145cd;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:#111827;color:#fff;padding:20px 16px 24px} .wrap{max-width:900px;margin:auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}.logo{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#766bff;color:white}
+header p{color:#d1d5db;margin:10px 0 0;max-width:600px}
+main{max-width:900px;margin:20px auto;padding:0 14px 44px}.layout{display:grid;grid-template-columns:1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 5px 20px #10182808}
+h2{font-size:18px;margin:0 0 14px}label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px}
+input,textarea,select{width:100%;border:1px solid #d0d5dd;border-radius:10px;padding:12px;font:inherit;background:white;color:var(--ink)}textarea{min-height:82px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.upload{border:1.5px dashed #c5c9d5;border-radius:12px;padding:14px;text-align:center;background:#fafaff}
+.upload input{border:0;padding:6px;background:transparent}.preview{display:none;max-width:100%;max-height:180px;object-fit:contain;border-radius:10px;margin:10px auto 0}
+button{border:0;border-radius:11px;padding:13px 16px;background:var(--accent);color:white;font:700 15px system-ui;cursor:pointer;width:100%;margin-top:16px}button:hover{background:var(--accent2)}button.secondary{background:#f1f0ff;color:#4036b5;border:1px solid #dedbff}
+.output{display:none}.result{border:1px solid var(--line);border-radius:12px;padding:13px;margin:10px 0;background:#fff}.result h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 8px}.result p{white-space:pre-wrap;margin:0}.copy{width:auto;margin:10px 0 0;padding:8px 12px;font-size:13px}.tag{display:inline-block;border-radius:99px;background:#f1f0ff;color:#4438ca;padding:5px 9px;margin:4px 4px 0 0;font-size:12px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:12px}
+@media(min-width:720px){.layout{grid-template-columns:0.95fr 1.05fr}header{padding:26px 20px 30px}main{padding:0 20px 50px}.card{padding:22px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand"><span class="logo">L</span> Listify AI <span style="font-size:11px;background:#292d45;padding:4px 8px;border-radius:99px;color:#d8d6ff">BETA</span></div>
+  <p>Turn a product name and details into a clearer, marketplace-ready listing in seconds.</p>
+</div></header>
+<main><div class="layout">
+<section class="card">
+<h2>✦ Create a listing</h2>
+<form id="listingForm">
+<label for="product">Product name *</label>
+<input id="product" placeholder="e.g. Stainless steel water bottle" required maxlength="120">
+<label for="features">Product facts and features</label>
+<textarea id="features" placeholder="Capacity: 750 ml&#10;Material: stainless steel&#10;Leak-resistant lid"></textarea>
+<div class="hint">Add only details you can verify. The demo won't invent technical specs.</div>
+<div class="row">
+<div><label for="market">Where will you sell?</label><select id="market"><option>General online store</option><option>Shopify</option><option>Amazon</option><option>Etsy</option><option>eBay</option><option>TikTok Shop</option></select></div>
+<div><label for="tone">Writing style</label><select id="tone"><option value="clear">Clear & helpful</option><option value="friendly">Friendly</option><option value="premium">Premium</option><option value="playful">Playful</option></select></div>
+</div>
+<label for="language">Output language</label><select id="language"><option value="English">English</option><option value="Arabic">Arabic</option><option value="French">French</option><option value="Spanish">Spanish</option></select>
+<label>Optional product image</label>
+<div class="upload"><div>Upload a photo to preview it alongside your listing</div><input type="file" id="image" accept="image/*"><img id="preview" class="preview" alt="Product preview"></div>
+<button type="submit">Generate product listing</button>
+<p class="hint">Prototype mode: generates a structured draft in your browser. It does not send data to an AI service yet.</p>
+</form>
+</section>
+<section class="card output" id="output" aria-live="polite">
+<h2>✧ Your listing draft</h2>
+<div class="hint" id="platformNote"></div>
+<div class="result"><h3>Product title</h3><p id="outTitle"></p><button class="copy" data-copy="outTitle">Copy title</button></div>
+<div class="result"><h3>Product description</h3><p id="outDesc"></p><button class="copy" data-copy="outDesc">Copy description</button></div>
+<div class="result"><h3>Key features</h3><p id="outFeatures"></p><button class="copy" data-copy="outFeatures">Copy features</button></div>
+<div class="result"><h3>SEO keyword ideas</h3><div id="outKeywords"></div><button class="copy" id="copyKeywords">Copy keywords</button></div>
+<div class="result"><h3>Meta description</h3><p id="outMeta"></p><button class="copy" data-copy="outMeta">Copy meta description</button></div>
+<button class="secondary" id="copyAll">Copy full listing</button>
+<p class="hint">Review every claim before publishing. Keyword ideas are suggestions, not a ranking guarantee.</p>
+</section>
+</div>
+<footer>Listify AI · Early prototype · No account required</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let imageData='';
+$('image').addEventListener('change',e=>{
+ const f=e.target.files&&e.target.files[0]; if(!f)return;
+ if(!f.type.startsWith('image/'))return;
+ const reader=new FileReader();reader.onload=()=>{$('preview').src=reader.result;$('preview').style.display='block';imageData=reader.result};reader.readAsDataURL(f);
+});
+function clean(s){return s.replace(/\s+/g,' ').trim()}
+function sentence(s){s=clean(s);if(!s)return '';return /[.!?]$/.test(s)?s:s+'.'}
+function makeTitle(name,market){
+ let n=clean(name).replace(/[.!?]+$/,'');
+ const suffix=market==='Etsy'?' — Thoughtful Everyday Essential':market==='Amazon'?' | Product Details & Key Features':' — Features & Details';
+ return (n+suffix).slice(0,market==='Amazon'?180:120);
+}
+function makeListing(name,facts,market,tone,language){
+ const lines=facts.split(/\n|[,;]/).map(x=>x.replace(/^[-•*]\s*/,'').trim()).filter(Boolean).slice(0,8);
+ const intro={
+ clear:`Meet ${name}, designed for practical everyday use.`,
+ friendly:`Say hello to ${name} — a useful addition to your everyday routine.`,
+ premium:`Discover ${name}, with a considered design for everyday use.`,
+ playful:`Make room for ${name} in your daily lineup.`
+ }[tone];
+ const factText=lines.length?'\n\nProduct details:\n'+lines.map(x=>'• '+x).join('\n'):'';
+ const desc=intro+factText+`\n\nPlease check the product details, sizing, materials, and compatibility before ordering.`;
+ const keywords=[...new Set((name+' '+lines.join(' ')).toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu,' ').split(/\s+/).filter(w=>w.length>2))].slice(0,12);
+ const translated={
+ English:{title:'',desc:''},
+ Arabic:{title:' (تفاصيل ومميزات)',desc:`تعرّف على ${name}، المصمّم للاستخدام اليومي.\n\n${lines.length?'التفاصيل:\n'+lines.map(x=>'• '+x).join('\n'):'أضف تفاصيل المنتج المؤكدة لمساعدة العملاء على اتخاذ قرار مناسب.'}\n\nيرجى مراجعة المواصفات والتأكد منها قبل النشر.`},
+ French:{title:' — détails et caractéristiques',desc:`Découvrez ${name}, pensé pour un usage quotidien.\n\n${lines.length?'Détails du produit :\n'+lines.map(x=>'• '+x).join('\n'):'Ajoutez les caractéristiques vérifiées du produit.'}\n\nVérifiez toutes les informations avant publication.`},
+ Spanish:{title:' — detalles y características',desc:`Descubre ${name}, pensado para el uso diario.\n\n${lines.length?'Detalles del producto:\n'+lines.map(x=>'• '+x).join('\n'):'Añade características verificadas del producto.'}\n\nRevisa toda la información antes de publicar.`}
+ };
+ let title=makeTitle(name,market), description=desc;
+ if(language!=='English'){title=(clean(name)+translated[language].title).slice(0,120);description=translated[language].desc}
+ return {title,description,features:lines.length?lines.map(x=>'• '+x).join('\n'):'• Add verified features and specifications for a more useful listing.',keywords,meta:(description.replace(/\s+/g,' ').slice(0,155).replace(/[.,;:\s]+$/,'')+'…')};
+}
+$('listingForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const name=clean($('product').value),facts=$('features').value,market=$('market').value,tone=$('tone').value,language=$('language').value;
+ if(!name)return;
+ const r=makeListing(name,facts,market,tone,language);
+ $('outTitle').textContent=r.title;$('outDesc').textContent=r.description;$('outFeatures').textContent=r.features;$('outMeta').textContent=r.meta;
+ $('outKeywords').innerHTML='';r.keywords.forEach(k=>{const s=document.createElement('span');s.className='tag';s.textContent=k;$('outKeywords').appendChild(s)});
+ $('platformNote').textContent='Draft for '+market+' · '+language;
+ $('output').style.display='block';
+ if(window.innerWidth<720)$('output').scrollIntoView({behavior:'smooth',block:'start'});
+});
+async function copyText(text,button){try{await navigator.clipboard.writeText(text);const old=button.textContent;button.textContent='Copied!';setTimeout(()=>button.textContent=old,1300)}catch(e){alert('Copy is not available in this browser. Select the text and copy it manually.')}} 
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>copyText($(b.dataset.copy).textContent,b)));
+$('copyKeywords').addEventListener('click',()=>copyText([...$('outKeywords').querySelectorAll('.tag')].map(x=>x.textContent).join(', '),$('copyKeywords')));
+$('copyAll').addEventListener('click',()=>copyText('TITLE\n'+$('outTitle').textContent+'\n\nDESCRIPTION\n'+$('outDesc').textContent+'\n\nFEATURES\n'+$('outFeatures').textContent+'\n\nKEYWORDS\n'+[...$('outKeywords').querySelectorAll('.tag')].map(x=>x.textContent).join(', ')+'\n\nMETA DESCRIPTION\n'+$('outMeta').textContent,$('copyAll')));
+</script>
+</body>
+</html>
